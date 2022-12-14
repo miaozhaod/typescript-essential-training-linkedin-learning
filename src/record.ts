@@ -19,14 +19,37 @@ interface Contact {
     name: string;
     status: ContactStatus;
     address: Address;
+    email: string;
 }
 
-interface Query {
+interface Query<TProp> {
     sort?: "asc" | "desc";
-    matches(val): boolean;
+    matches(val: TProp): boolean;
 }
 
-function searchContacts(contacts: Contact[], query: Record<keyof Contact, Query>){
+// type ContactQuery = Omit<
+//     Partial<
+//         Record<keyof Contact, Query>
+//     >,
+//     "address" | "status"
+// >
+
+// type ContactQuery = 
+//     Partial<
+//         Pick<
+//             Record<keyof Contact, Query>,
+//             "id" | "name"
+//         >
+//     >
+
+// type RequiredContactQuery = Required<ContactQuery>
+
+// extract metadata from existing
+type ContactQuery = {
+    [TProp in keyof Contact]? : Query<Contact[TProp]>
+}
+
+function searchContacts(contacts: Contact[], query: ContactQuery){
     return contacts.filter(contact => {
         for (const property of Object.keys(contact)){
             const propertyQuery = query[property]
